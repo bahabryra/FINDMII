@@ -1,0 +1,40 @@
+name: Build FINDMII
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install devkitPro pacman & Wii U toolchain
+      run: |
+        curl -L https://apt.devkitpro.org/install-devkitpro-pacman.sh -o install.sh
+        sudo bash install.sh
+        sudo dkp-pacman -Syu --noconfirm
+        sudo dkp-pacman -S --noconfirm wiiu-dev
+
+    - name: Set environment
+      run: |
+        echo "export DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+        echo "export DEVKITPPC=/opt/devkitpro/devkitPPC" >> $GITHUB_ENV
+        echo "export PATH=$PATH:/opt/devkitpro/tools/bin" >> $GITHUB_ENV
+
+    - name: Build with make
+      run: |
+        make
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: FINDMII-rpx
+        path: |
+          *.rpx
+          build/*.rpx
