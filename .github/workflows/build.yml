@@ -2,8 +2,7 @@ name: Build FINDMII
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -14,27 +13,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install devkitPro pacman & Wii U toolchain
+    - name: Install devkitPro pacman & Wii U toolchain
       run: |
         curl -L https://apt.devkitpro.org/install-devkitpro-pacman.sh -o install.sh
         sudo bash install.sh
         sudo dkp-pacman -Syu --noconfirm
         sudo dkp-pacman -S --noconfirm wiiu-dev
 
-    - name: Set environment
+    - name: Set environment variables
       run: |
-        echo "export DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-        echo "export DEVKITPPC=/opt/devkitpro/devkitPPC" >> $GITHUB_ENV
-        echo "export PATH=$PATH:/opt/devkitpro/tools/bin" >> $GITHUB_ENV
+        echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+        echo "DEVKITPPC=$DEVKITPRO/devkitPPC" >> $GITHUB_ENV
+        echo "PATH=$PATH:$DEVKITPRO/tools/bin" >> $GITHUB_ENV
 
     - name: Build with make
-      run: |
-        make
+      run: make
 
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FINDMII-rpx
         path: |
+          FINDMII.rpx
           *.rpx
-          build/*.rpx
+        overwrite: true
