@@ -1,3 +1,5 @@
+# .github/workflows/build.yml
+
 name: Build FINDMII
 
 on:
@@ -13,21 +15,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install devkitPro pacman & Wii U toolchain (via .deb)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget gnupg
-        wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
-        sudo dpkg -i devkitpro-pacman.deb || true
-        sudo apt-get install -f -y
-        sudo dkp-pacman -Syu --noconfirm
-        sudo dkp-pacman -S --noconfirm wiiu-dev
-
-    - name: Set environment variables
-      run: |
-        echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-        echo "DEVKITPPC=/opt/devkitpro/devkitPPC" >> $GITHUB_ENV
-        echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
+    - name: Setup devkitPro toolchains
+      uses: boredazfcuk/setup-devkitpro@v5
+      with:
+        toolchains: wiiu   # installs devkitPPC + wut for Wii U
 
     - name: Build with make
       run: make
