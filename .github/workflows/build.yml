@@ -13,18 +13,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install devkitPro pacman & Wii U toolchain
+    - name: Install devkitPro pacman & Wii U toolchain (via .deb)
       run: |
-        curl -L https://apt.devkitpro.org/install-devkitpro-pacman.sh -o install.sh
-        sudo bash install.sh
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg
+        wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
+        sudo dpkg -i devkitpro-pacman.deb || true
+        sudo apt-get install -f -y
         sudo dkp-pacman -Syu --noconfirm
         sudo dkp-pacman -S --noconfirm wiiu-dev
 
     - name: Set environment variables
       run: |
         echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-        echo "DEVKITPPC=$DEVKITPRO/devkitPPC" >> $GITHUB_ENV
-        echo "PATH=$PATH:$DEVKITPRO/tools/bin" >> $GITHUB_ENV
+        echo "DEVKITPPC=/opt/devkitpro/devkitPPC" >> $GITHUB_ENV
+        echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
 
     - name: Build with make
       run: make
@@ -35,5 +38,5 @@ jobs:
         name: FINDMII-rpx
         path: |
           FINDMII.rpx
-          *.rpx
+          build/*.rpx
         overwrite: true
